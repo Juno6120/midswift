@@ -6,7 +6,6 @@ import Link from "next/link";
 import { LogoutModal } from "@/src/components/modals/LogoutModal";
 import { createClient } from "@/src/lib/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
-import { useLoading } from "@/src/context/LoadingContext";
 import { User, LogOut, RefreshCw, ChevronUp, ChevronDown, BarChart3, Search, LayoutDashboard } from "lucide-react";
 import LoadingScreen from "@/src/components/ui/LoadingScreen";
 import { motion, AnimatePresence } from "framer-motion";
@@ -44,7 +43,6 @@ export default function DashboardLayoutClient({
   const router = useRouter();
   const pathname = usePathname();
   const supabase = createClient();
-  const { startLoading } = useLoading();
 
   // I'm checking if I'm on the landing page so I can adjust the layout and header styles accordingly.
   const isHomePage = pathname === "/";
@@ -75,7 +73,6 @@ export default function DashboardLayoutClient({
       return;
     }
     setShowLogoutModal(false);
-    startLoading();
     router.replace("/");
     router.refresh();
   };
@@ -93,7 +90,6 @@ export default function DashboardLayoutClient({
     }
 
     setIsMenuOpen(false);
-    startLoading();
     router.push(href);
   };
 

@@ -67,16 +67,22 @@ export default function AuthForm() {
 
   // I'm defining these variants so Framer Motion knows how to slide the form left or right.
   const formVariants: Variants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 60 : -60,
+    enter: () => ({
+      y: 10,
+      scale: 0.985,
+      filter: "blur(6px)",
       opacity: 0,
     }),
     center: {
-      x: 0,
+      y: 0,
+      scale: 1,
+      filter: "blur(0px)",
       opacity: 1,
     },
-    exit: (direction: number) => ({
-      x: direction < 0 ? 60 : -60,
+    exit: () => ({
+      y: -10,
+      scale: 0.985,
+      filter: "blur(6px)",
       opacity: 0,
     }),
   };
@@ -167,10 +173,6 @@ export default function AuthForm() {
       document.removeEventListener("touchstart", handleClickOutside);
     };
   }, []);
-
-  useEffect(() => {
-    setIsLogin(searchParams.get("mode") !== "signup");
-  }, [searchParams]);
 
   // I'm using this helper to bold the part of the text that matches the user's search query.
   const highlightMatch = (text: string): ReactNode => {
@@ -327,12 +329,12 @@ export default function AuthForm() {
       setDirection(-1);
       setIsLogin(true);
       setError(null);
-      router.replace("/login", { scroll: false });
+      window.history.replaceState(null, "", "/login");
     } else if (type === "signup" && isLogin) {
       setDirection(1);
       setIsLogin(false);
       setError(null);
-      router.replace("/login?mode=signup", { scroll: false });
+      window.history.replaceState(null, "", "/login?mode=signup");
     }
   };
 
@@ -387,10 +389,10 @@ export default function AuthForm() {
 
       <motion.div
         layout
-        transition={{ type: "spring", stiffness: 360, damping: 32, mass: 0.95 }}
+        transition={{ type: "spring", stiffness: 320, damping: 28, mass: 0.9 }}
         className="relative overflow-hidden p-1 -m-1"
       >
-        <AnimatePresence mode="wait" custom={direction}>
+        <AnimatePresence mode="wait" initial={false} custom={direction}>
           <motion.form
             key={isLogin ? "login" : "signup"}
             custom={direction}
@@ -399,12 +401,14 @@ export default function AuthForm() {
             animate="center"
             exit="exit"
             transition={{
-              x: { type: "spring", stiffness: 360, damping: 32, mass: 0.95 },
-              opacity: { duration: 0.22, ease: "easeOut" },
-              layout: { type: "spring", stiffness: 360, damping: 32 },
+              y: { type: "spring", stiffness: 280, damping: 24, mass: 0.9 },
+              scale: { duration: 0.18, ease: "easeOut" },
+              filter: { duration: 0.18, ease: "easeOut" },
+              opacity: { duration: 0.18, ease: "easeOut" },
+              layout: { type: "spring", stiffness: 320, damping: 28 },
             }}
             onSubmit={handleSubmit}
-            className="flex flex-col gap-5"
+            className="flex min-h-[26rem] flex-col gap-5"
           >
             {error && (
               <div className="bg-red-50/80 dark:bg-red-950/40 backdrop-blur-md border border-red-200/50 dark:border-red-900/50 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm font-medium">
@@ -418,7 +422,7 @@ export default function AuthForm() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ type: "spring", stiffness: 360, damping: 32, mass: 0.95 }}
+                transition={{ type: "spring", stiffness: 280, damping: 24, mass: 0.9 }}
                 className="flex flex-col gap-5 overflow-visible"
               >
                 <div className="flex flex-col gap-2">
