@@ -37,7 +37,9 @@
   "minSdkVersion": 21,
   "orientation": "portrait",
   "fingerprints": [],
-  "additionalTrustedOrigins": [],
+  "additionalTrustedOrigins": [
+    "https://www.midswift.com"
+  ],
   "retainedBundles": [],
   "protocolHandlers": [],
   "fileHandlers": [],

@@ -15,7 +15,9 @@
      limitations under the License.
 -->
 <resources>
-  
+  <string-array name="additional_trusted_origins">
+    <item>https://www.midswift.com</item>
+  </string-array>
 
   <!--
     The "fullscreen" and "fullscreen-sticky" TWA manifest values correspond to "immersive" and "sticky-immersive"
@@ -36,7 +38,13 @@
             \"namespace\": \"web\",
             \"site\": \"https://midswift.com\"
         }
+    },
+    {
+        \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+        \"target\": {
+            \"namespace\": \"web\",
+            \"site\": \"https://www.midswift.com\"
+        }
     }]
-    
   </string>  
 </resources>
