@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.midswift.app",
+      "sha256_cert_fingerprints": [
+        "1E:FB:8F:07:98:7F:1C:22:34:EF:08:CA:3E:A4:55:7C:A0:CA:83:D6:55:6E:75:14:0D:2E:A2:F3:66:A8:E7:22"
+      ]
+    }
+  }
+]

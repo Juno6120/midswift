@@ -34,3 +34,9 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Android Wrapper
+
+This repo also contains a minimal Android Trusted Web Activity wrapper in `android/` for shipping MidSwift as an installable Android app without browser shortcut branding.
+
+Before publishing the Android app, replace the placeholder fingerprint in `public/.well-known/assetlinks.json` with the SHA-256 fingerprint from the signing key used for the Android build.
