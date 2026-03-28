@@ -15,6 +15,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 import LoadingScreen from "@/src/components/ui/LoadingScreen";
 
@@ -175,31 +176,39 @@ function CustomSelect({
         />
       </button>
 
-      {isOpen && (
-        <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl shadow-2xl z-70 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-          <div className="py-2 max-h-48 overflow-y-auto scrollbar-custom">
-            {options.map((opt) => (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => {
-                  onChange(opt);
-                  setIsOpen(false);
-                }}
-                className={cn(
-                  "flex items-center justify-between w-full px-5 py-3 text-left transition-colors",
-                  value === opt
-                    ? "bg-teal-500/10 text-teal-600 dark:text-teal-400"
-                    : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100",
-                )}
-              >
-                <span className="font-bold text-sm tracking-wide">{opt}</span>
-                {value === opt && <Check className="w-4 h-4" strokeWidth={3} />}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="absolute top-[calc(100%+8px)] left-0 w-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl shadow-2xl z-70 overflow-hidden"
+            initial={{ opacity: 0, y: -4, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          >
+            <div className="py-2 max-h-48 overflow-y-auto scrollbar-custom">
+              {options.map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => {
+                    onChange(opt);
+                    setIsOpen(false);
+                  }}
+                  className={cn(
+                    "flex items-center justify-between w-full px-5 py-3 text-left transition-colors",
+                    value === opt
+                      ? "bg-teal-500/10 text-teal-600 dark:text-teal-400"
+                      : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100",
+                  )}
+                >
+                  <span className="font-bold text-sm tracking-wide">{opt}</span>
+                  {value === opt && <Check className="w-4 h-4" strokeWidth={3} />}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -213,7 +222,7 @@ interface InlineAlertProps {
 // It's much nicer than a standard browser alert.
 function InlineAlert({ message, onDismiss }: InlineAlertProps) {
   return (
-    <div className="flex items-start gap-3 px-5 py-4 bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 rounded-2xl animate-in slide-in-from-top-2 duration-300">
+    <div className="flex items-start gap-3 px-5 py-4 bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 rounded-2xl animate-dropdown-in">
       <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
       <p className="text-[13px] font-bold text-rose-600 dark:text-rose-400 flex-1 leading-snug">
         {message}
@@ -275,7 +284,7 @@ export function NewReportModal({ isOpen, onClose }: NewReportModalProps) {
     };
   }, [isOpen, handleEsc]);
 
-  if (!mounted || !isOpen) return null;
+  if (!mounted) return null;
 
   // Some reports are quarterly, so I'm filtering the available months here.
   const availableMonths =
@@ -339,38 +348,44 @@ export function NewReportModal({ isOpen, onClose }: NewReportModalProps) {
   // I'm using createPortal to render this at the top level of the DOM.
   // This keeps the modal on top of everything else regardless of parent styling.
   return createPortal(
-    <div
-      className="fixed inset-0 z-200 flex items-center justify-center p-4 md:p-6"
-      role="dialog"
-    >
-      <div
-        className="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm transition-opacity duration-500"
-        onClick={onClose}
-      />
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-200 flex items-center justify-center p-4 md:p-6"
+          role="dialog"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <motion.div
+            className="absolute inset-0 bg-zinc-900/60 dark:bg-black/60 backdrop-blur-sm"
+            onClick={onClose}
+          />
 
-      <div className="relative w-full max-w-120 max-h-[90vh] overflow-y-auto scrollbar-custom bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border border-teal-500/15 dark:border-teal-400/10 rounded-[42px] shadow-[0_20px_60px_-10px_rgba(20,184,166,0.2),0_32px_80px_-20px_rgba(0,0,0,0.3)] transition-all duration-500 animate-in fade-in zoom-in-95 slide-in-from-bottom-8">
-        <div className="absolute -top-24 -left-24 w-64 h-64 bg-teal-400/20 rounded-full blur-[80px] pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-emerald-400/15 rounded-full blur-[80px] pointer-events-none" />
-
+          <motion.div
+            className="relative bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 rounded-3xl shadow-2xl shadow-zinc-200/20 dark:shadow-none w-full max-w-lg max-h-[90vh] overflow-y-auto scrollbar-custom"
+            initial={{ opacity: 0, scale: 0.96, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            transition={{ type: "spring", stiffness: 500, damping: 35 }}
+          >
         <button
           onClick={onClose}
-          className="absolute top-8 right-8 z-10 p-2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:scale-110 active:scale-95 transition-all"
+          className="absolute top-5 right-5 z-10 p-2 rounded-full bg-zinc-100/80 dark:bg-zinc-800/60 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:scale-110 active:scale-95 transition-all"
         >
-          <X size={18} strokeWidth={2.5} />
+          <X size={16} strokeWidth={2.5} />
         </button>
 
-        <div className="relative px-6 sm:px-10 pt-10 pb-10">
-          <div className="flex flex-col items-center text-center mb-8">
-            <div className="relative mb-5">
-              <div className="absolute -inset-3 bg-teal-500/20 rounded-2xl blur-lg animate-pulse" />
-              <div className="relative w-14 h-14 rounded-2xl bg-teal-600 flex items-center justify-center shadow-lg shadow-teal-600/20">
-                <FilePlus2 className="w-7 h-7 text-white" strokeWidth={2.5} />
-              </div>
+        <div className="relative px-6 sm:px-8 pt-8 pb-8">
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="flex items-center justify-center w-12 h-12 mx-auto bg-teal-500/15 border border-teal-500/20 rounded-full mb-4">
+              <FilePlus2 className="w-6 h-6 text-teal-600 dark:text-teal-400" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight">
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
               New Report
             </h2>
-            <p className="text-zinc-500 dark:text-zinc-400 text-sm sm:text-[15px] font-medium mt-1">
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm">
               Select your filing parameters below.
             </p>
           </div>
@@ -455,14 +470,14 @@ export function NewReportModal({ isOpen, onClose }: NewReportModalProps) {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-6 py-4 rounded-2xl text-sm font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                className="flex-1 px-4 py-2.5 border border-zinc-200/50 dark:border-zinc-700/50 text-zinc-700 dark:text-zinc-300 font-semibold rounded-xl hover:bg-zinc-500/10 dark:hover:bg-zinc-800/50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex-2 group relative flex items-center justify-center gap-2 bg-zinc-900 dark:bg-teal-600 hover:bg-zinc-800 dark:hover:bg-teal-500 text-white font-bold rounded-2xl px-6 py-4 shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all disabled:opacity-50 disabled:translate-y-0"
+                className="flex-2 group flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-teal-600/20 border border-teal-500/50 active:scale-95 transition-all disabled:opacity-50"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -478,34 +493,36 @@ export function NewReportModal({ isOpen, onClose }: NewReportModalProps) {
               </button>
             </div>
           </form>
-        </div>
-      </div>
+          </div>
+        </motion.div>
 
-      {isLoading && (
-        <LoadingScreen isTimeout={false} onClose={() => setIsLoading(false)} />
+        {isLoading && (
+          <LoadingScreen isTimeout={false} onClose={() => setIsLoading(false)} />
+        )}
+
+        {/* I'm injecting these global styles to give the scrollbars a custom, brand-matched look. */}
+        <style jsx global>{`
+          .scrollbar-custom::-webkit-scrollbar {
+            width: 5px;
+          }
+          .scrollbar-custom::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: rgba(20, 184, 166, 0.2);
+            border-radius: 10px;
+          }
+          .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+            background: rgba(20, 184, 166, 0.4);
+          }
+          .scrollbar-custom {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(20, 184, 166, 0.2) transparent;
+          }
+        `}</style>
+      </motion.div>
       )}
-
-      {/* I'm injecting these global styles to give the scrollbars a custom, brand-matched look. */}
-      <style jsx global>{`
-        .scrollbar-custom::-webkit-scrollbar {
-          width: 5px;
-        }
-        .scrollbar-custom::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .scrollbar-custom::-webkit-scrollbar-thumb {
-          background: rgba(20, 184, 166, 0.2);
-          border-radius: 10px;
-        }
-        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-          background: rgba(20, 184, 166, 0.4);
-        }
-        .scrollbar-custom {
-          scrollbar-width: thin;
-          scrollbar-color: rgba(20, 184, 166, 0.2) transparent;
-        }
-      `}</style>
-    </div>,
+    </AnimatePresence>,
     document.body,
   );
 }

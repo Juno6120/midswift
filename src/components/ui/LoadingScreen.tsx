@@ -105,33 +105,26 @@ export default function LoadingScreen({
           using styled-jsx so they don't leak into or conflict with the rest of my app. */}
       <style jsx>{`
         @keyframes heartbeat {
-          0% {
+          0%, 60%, 100% {
             transform: scale(1);
           }
-          14% {
-            transform: scale(1.25);
+          15% {
+            transform: scale(1.22);
           }
-          28% {
+          30% {
             transform: scale(1);
           }
-          42% {
-            transform: scale(1.18);
-          }
-          56% {
-            transform: scale(1);
-          }
-          100% {
-            transform: scale(1);
+          45% {
+            transform: scale(1.15);
           }
         }
         @keyframes ringPulse {
-          0%,
-          100% {
+          0%, 100% {
             transform: scale(1);
-            opacity: 0.6;
+            opacity: 0.5;
           }
-          42% {
-            transform: scale(1.12);
+          50% {
+            transform: scale(1.1);
             opacity: 1;
           }
         }

@@ -50,7 +50,7 @@ export default function FabMenu({ onReportBug, onAbout }: FabMenuProps) {
       */}
       <div
         ref={fabRef}
-        className="fixed bottom-8 right-8 z-100 flex flex-col items-end gap-3 pointer-events-none"
+        className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-100 flex flex-col items-end gap-3 pointer-events-none"
       >
         {/* Here's the wrapper for our actual popup buttons. 
           I'm toggling Tailwind classes based on the 'isFabOpen' state to smoothly 
@@ -58,11 +58,11 @@ export default function FabMenu({ onReportBug, onAbout }: FabMenuProps) {
         */}
         <div
           className={`
-            flex flex-col gap-2 transition-all duration-500 ease-[cubic-bezier(0.19,1,0.22,1)]
+            flex flex-col gap-2 will-change-[transform,opacity] transition-[transform,opacity,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
             ${
               isFabOpen
                 ? "opacity-100 translate-y-0 scale-100 visible pointer-events-auto"
-                : "opacity-0 translate-y-6 scale-95 invisible pointer-events-none"
+                : "opacity-0 translate-y-4 scale-95 invisible pointer-events-none"
             }
           `}
         >
@@ -135,8 +135,8 @@ export default function FabMenu({ onReportBug, onAbout }: FabMenuProps) {
             rounded-2xl flex items-center justify-center
             shadow-[0_8px_24px_rgba(13,148,136,0.35)]
             hover:scale-110 active:scale-95
-            transition-all duration-500 focus:outline-none
-            overflow-hidden pointer-events-auto
+            transition-[transform,background-color,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none
+            overflow-hidden pointer-events-auto will-change-transform
             ${
               isFabOpen
                 ? "bg-slate-800 shadow-[0_8px_24px_rgba(15,23,42,0.3)]"
@@ -157,7 +157,7 @@ export default function FabMenu({ onReportBug, onAbout }: FabMenuProps) {
           */}
           <div
             className={`
-              absolute inset-0 h-full w-full transition-all duration-700
+              absolute inset-0 h-full w-full transition-[transform,opacity] duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform
               ${isFabOpen ? "rotate-135 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"}
             `}
           >
@@ -176,7 +176,7 @@ export default function FabMenu({ onReportBug, onAbout }: FabMenuProps) {
           */}
           <div
             className={`
-              absolute transition-all duration-500
+              absolute transition-[transform,opacity] duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform
               ${isFabOpen ? "rotate-0 scale-100 opacity-100" : "rotate-[-135deg] scale-0 opacity-0"}
             `}
           >

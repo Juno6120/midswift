@@ -169,7 +169,62 @@
   animation-delay: -10s;
 }
 
-/* I’m using an inline SVG here to create a subtle grain texture. 
+/* GPU-accelerated smooth transitions for interactive elements */
+.smooth-transform {
+  will-change: transform, opacity;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Smooth dropdown entrance */
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-dropdown-in {
+  animation: dropdownIn 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Smooth tooltip entrance */
+@keyframes tooltipIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+.animate-tooltip-in {
+  animation: tooltipIn 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Smooth modal/overlay entrance */
+@keyframes fadeScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-scale-in {
+  animation: fadeScaleIn 250ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* I’m using an inline SVG here to create a subtle grain texture.
    The low opacity ensures it just adds a bit of depth without being noisy. */
 .bg-grain {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");

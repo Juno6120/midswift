@@ -13,13 +13,29 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, Mail, Lock, User, ChevronDown, X } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  ChevronDown,
+  X,
+  ArrowLeft,
+  KeyRound,
+} from "lucide-react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import LoadingScreen from "@/src/components/ui/LoadingScreen";
 
 export default function AuthForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const supabase = createClient();
+
   // I'm using these states to manage the UI toggle, animations, and loading feedback.
-  const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [isLogin, setIsLogin] = useState<boolean>(
+    searchParams.get("mode") !== "signup",
+  );
   const [direction, setDirection] = useState<number>(0);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -32,16 +48,19 @@ export default function AuthForm() {
   const [fullName, setFullName] = useState<string>("");
   const [rhuAssignment, setRhuAssignment] = useState<string>("");
 
+  // Forgot password flow states.
+  const [forgotStep, setForgotStep] = useState<null | "email" | "otp">(null);
+  const [resetEmail, setResetEmail] = useState<string>("");
+  const [otpCode, setOtpCode] = useState<string>("");
+  const [forgotLoading, setForgotLoading] = useState<boolean>(false);
+  const [forgotMessage, setForgotMessage] = useState<string | null>(null);
+
   // I'm using these to handle the custom "Barangay" autocomplete dropdown.
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
 
   // I'm setting up a ref here so I can detect if a user clicks outside the dropdown to close it.
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const supabase = createClient();
 
   // I'm detecting if the user arrived here via the Switch Account flow.
   const isSwitchMode = searchParams.get("switch") === "true";
@@ -238,9 +257,59 @@ export default function AuthForm() {
         setIsLoading(false);
         return;
       }
-      router.push("/");
+      router.push("/?welcome=new");
       router.refresh();
     }
+  };
+
+  // Sends a password reset OTP to the user's email via Supabase.
+  const handleSendResetEmail = async (e: FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    setError(null);
+    setForgotMessage(null);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail);
+    if (error) {
+      setError(error.message);
+      setForgotLoading(false);
+      return;
+    }
+
+    setForgotMessage("Verification code sent! Check your email.");
+    setForgotStep("otp");
+    setForgotLoading(false);
+  };
+
+  // Verifies the OTP code and redirects to the change password page.
+  const handleVerifyOtp = async (e: FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    setError(null);
+    setForgotMessage(null);
+
+    const { error } = await supabase.auth.verifyOtp({
+      email: resetEmail,
+      token: otpCode,
+      type: "recovery",
+    });
+    if (error) {
+      setError("Invalid or expired code. Please try again.");
+      setForgotLoading(false);
+      return;
+    }
+
+    router.push("/change-password");
+    router.refresh();
+  };
+
+  // Resets the forgot password flow back to the login form.
+  const handleBackToLogin = () => {
+    setForgotStep(null);
+    setResetEmail("");
+    setOtpCode("");
+    setError(null);
+    setForgotMessage(null);
   };
 
   // I'm showing the loading screen and navigating back when the user cancels the switch account flow.
@@ -419,29 +488,37 @@ export default function AuthForm() {
                       />
                     </div>
                   </div>
-                  {dropdownOpen && (
-                    <div className="absolute z-20 mt-20 w-full max-h-60 overflow-y-auto bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200/50 rounded-xl shadow-xl animate-in fade-in slide-in-from-top-2 duration-150">
-                      {filteredBarangays.length > 0 ? (
-                        filteredBarangays.map((barangay, index) => (
-                          <div
-                            key={barangay}
-                            onClick={() => {
-                              setRhuAssignment(barangay);
-                              setDropdownOpen(false);
-                              setActiveIndex(-1);
-                            }}
-                            className={`px-4 py-3 text-sm cursor-pointer transition-colors ${index === activeIndex ? "bg-teal-500/15 text-teal-700" : "hover:bg-teal-500/10 hover:text-teal-700"}`}
-                          >
-                            {highlightMatch(barangay)}
+                  <AnimatePresence>
+                    {dropdownOpen && (
+                      <motion.div
+                        className="absolute z-20 mt-20 w-full max-h-60 overflow-y-auto bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200/50 rounded-xl shadow-xl"
+                        initial={{ opacity: 0, y: -4, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -4, scale: 0.97 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      >
+                        {filteredBarangays.length > 0 ? (
+                          filteredBarangays.map((barangay, index) => (
+                            <div
+                              key={barangay}
+                              onClick={() => {
+                                setRhuAssignment(barangay);
+                                setDropdownOpen(false);
+                                setActiveIndex(-1);
+                              }}
+                              className={`px-4 py-3 text-sm cursor-pointer transition-colors ${index === activeIndex ? "bg-teal-500/15 text-teal-700" : "hover:bg-teal-500/10 hover:text-teal-700"}`}
+                            >
+                              {highlightMatch(barangay)}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-4 py-3 text-sm text-zinc-400">
+                            No barangay found
                           </div>
-                        ))
-                      ) : (
-                        <div className="px-4 py-3 text-sm text-zinc-400">
-                          No barangay found
-                        </div>
-                      )}
-                    </div>
-                  )}
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </motion.div>
             )}
@@ -507,6 +584,16 @@ export default function AuthForm() {
                   : "Create My Account"}
             </Button>
 
+            {isLogin && !forgotStep && (
+              <button
+                type="button"
+                onClick={() => setForgotStep("email")}
+                className="text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors self-center"
+              >
+                Forgot Password?
+              </button>
+            )}
+
             {/* Cancel button shown only when user arrived via Switch Account */}
             {isSwitchMode && (
               <button
@@ -518,6 +605,108 @@ export default function AuthForm() {
               </button>
             )}
           </motion.form>
+        </AnimatePresence>
+
+        {/* Forgot password flow */}
+        <AnimatePresence>
+          {forgotStep && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ type: "spring", stiffness: 500, damping: 35 }}
+              className="mt-6 p-5 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <button
+                  type="button"
+                  onClick={handleBackToLogin}
+                  className="p-1.5 text-zinc-400 hover:text-teal-600 rounded-lg hover:bg-zinc-100/50 transition-colors"
+                >
+                  <ArrowLeft size={18} />
+                </button>
+                <h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-300">
+                  {forgotStep === "email"
+                    ? "Reset Your Password"
+                    : "Enter Verification Code"}
+                </h3>
+              </div>
+
+              {error && (
+                <div className="bg-red-50/80 dark:bg-red-950/40 backdrop-blur-md border border-red-200/50 dark:border-red-900/50 text-red-600 dark:text-red-400 p-3 rounded-xl text-sm font-medium mb-4">
+                  {error}
+                </div>
+              )}
+
+              {forgotMessage && (
+                <div className="bg-teal-50/80 dark:bg-teal-950/40 backdrop-blur-md border border-teal-200/50 dark:border-teal-900/50 text-teal-600 dark:text-teal-400 p-3 rounded-xl text-sm font-medium mb-4">
+                  {forgotMessage}
+                </div>
+              )}
+
+              {forgotStep === "email" && (
+                <form onSubmit={handleSendResetEmail} className="flex flex-col gap-4">
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3.5 h-5 w-5 text-zinc-400" />
+                    <input
+                      type="email"
+                      required
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      className="w-full pl-10 pr-4 py-3 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-800/50 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:bg-white/80 focus:ring-2 focus:ring-teal-500/50 outline-none transition-all shadow-sm"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={forgotLoading}
+                    className="w-full bg-teal-600 hover:bg-teal-500 text-white h-12 text-sm font-bold rounded-xl shadow-lg transition-all active:scale-[0.98] border border-teal-500/50"
+                  >
+                    {forgotLoading ? "Sending..." : "Send Verification Code"}
+                  </Button>
+                </form>
+              )}
+
+              {forgotStep === "otp" && (
+                <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    We sent a code to <span className="font-bold text-zinc-700 dark:text-zinc-200">{resetEmail}</span>
+                  </p>
+                  <div className="relative">
+                    <KeyRound className="absolute left-3 top-3.5 h-5 w-5 text-zinc-400" />
+                    <input
+                      type="text"
+                      required
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value)}
+                      placeholder="Enter 8-digit code"
+                      maxLength={8}
+                      className="w-full pl-10 pr-4 py-3 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-800/50 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:bg-white/80 focus:ring-2 focus:ring-teal-500/50 outline-none transition-all shadow-sm tracking-widest text-center font-mono text-lg"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={forgotLoading}
+                    className="w-full bg-teal-600 hover:bg-teal-500 text-white h-12 text-sm font-bold rounded-xl shadow-lg transition-all active:scale-[0.98] border border-teal-500/50"
+                  >
+                    {forgotLoading ? "Verifying..." : "Verify & Continue"}
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotStep("email");
+                      setOtpCode("");
+                      setError(null);
+                      setForgotMessage(null);
+                    }}
+                    className="text-xs font-semibold text-zinc-500 hover:text-teal-600 transition-colors self-center"
+                  >
+                    Didn't receive a code? Try again
+                  </button>
+                </form>
+              )}
+            </motion.div>
+          )}
         </AnimatePresence>
       </motion.div>
     </div>

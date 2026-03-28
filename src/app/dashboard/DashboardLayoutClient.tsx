@@ -6,8 +6,9 @@ import Link from "next/link";
 import { LogoutModal } from "@/src/components/modals/LogoutModal";
 import { createClient } from "@/src/lib/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
-import { User, LogOut, RefreshCw, ChevronUp, ChevronDown } from "lucide-react";
+import { User, LogOut, RefreshCw, ChevronUp, ChevronDown, BarChart3, Search, LayoutDashboard } from "lucide-react";
 import LoadingScreen from "@/src/components/ui/LoadingScreen";
+import { motion, AnimatePresence } from "framer-motion";
 
 /** * I'm defining this interface to replace the 'any' type.
  * It helps me keep track of exactly what fields I expect from the Supabase profile.
@@ -20,11 +21,13 @@ interface UserProfile {
 interface DashboardLayoutProps {
   children: React.ReactNode;
   profile: UserProfile | null;
+  isAuthenticated?: boolean;
 }
 
 export default function DashboardLayoutClient({
   children,
   profile,
+  isAuthenticated,
 }: DashboardLayoutProps) {
   // I'm using these states to manage the UI toggle states for the sidebar and modals.
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -82,7 +85,7 @@ export default function DashboardLayoutClient({
 
   // I've moved the user menu items into a sub-component to keep the main JSX cleaner and easier to read.
   const UserMenuContent = () => (
-    <div className="py-2 w-48 bg-white/95 dark:bg-zinc-900/80 backdrop-blur-xl rounded-2xl shadow-xl shadow-zinc-200/20 dark:shadow-none border border-zinc-200/50 dark:border-zinc-800/50 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+    <div className="py-2 w-48 bg-white/95 dark:bg-zinc-900/80 backdrop-blur-xl rounded-2xl shadow-xl shadow-zinc-200/20 dark:shadow-none border border-zinc-200/50 dark:border-zinc-800/50 flex flex-col overflow-hidden">
       <Link
         href="/profile"
         onClick={() => setIsMenuOpen(false)}
@@ -146,28 +149,53 @@ export default function DashboardLayoutClient({
             </span>
           </Link>
 
-          <div className="relative" ref={topMenuRef}>
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex items-center gap-3 hover:bg-white/50 dark:hover:bg-zinc-800/50 p-1.5 pr-3 rounded-full transition-all border border-transparent hover:border-zinc-200/50 dark:hover:border-zinc-700/50"
-            >
-              <div className="w-8 h-8 rounded-full bg-teal-500/15 flex items-center justify-center text-teal-700 dark:text-teal-400 font-bold text-xs">
-                {profile?.full_name?.charAt(0)}
-              </div>
-              <span className="hidden sm:inline text-sm font-bold text-zinc-700 dark:text-zinc-200">
-                {profile?.full_name}
-              </span>
-              <ChevronDown
-                className={`w-4 h-4 text-zinc-400 transition-transform ${isMenuOpen ? "rotate-180" : ""}`}
-              />
-            </button>
+          {profile ? (
+            <div className="relative" ref={topMenuRef}>
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="flex items-center gap-3 hover:bg-white/50 dark:hover:bg-zinc-800/50 p-1.5 pr-3 rounded-full transition-all border border-transparent hover:border-zinc-200/50 dark:hover:border-zinc-700/50"
+              >
+                <div className="w-8 h-8 rounded-full bg-teal-500/15 flex items-center justify-center text-teal-700 dark:text-teal-400 font-bold text-xs">
+                  {profile.full_name?.charAt(0)}
+                </div>
+                <span className="hidden sm:inline text-sm font-bold text-zinc-700 dark:text-zinc-200">
+                  {profile.full_name}
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 text-zinc-400 transition-transform ${isMenuOpen ? "rotate-180" : ""}`}
+                />
+              </button>
 
-            {isMenuOpen && (
-              <div className="absolute right-0 mt-2 z-50">
-                <UserMenuContent />
-              </div>
-            )}
-          </div>
+              <AnimatePresence>
+                {isMenuOpen && (
+                  <motion.div
+                    className="absolute right-0 mt-2 z-50"
+                    initial={{ opacity: 0, y: -4, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -4, scale: 0.97 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  >
+                    <UserMenuContent />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : isAuthenticated === false ? (
+            <div className="flex items-center gap-3">
+              <Link
+                href="/login"
+                className="text-sm font-bold text-zinc-600 dark:text-zinc-300 hover:text-teal-700 dark:hover:text-teal-400 transition-colors px-4 py-2"
+              >
+                Log In
+              </Link>
+              <Link
+                href="/login?mode=signup"
+                className="text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 px-5 py-2 rounded-xl transition-colors"
+              >
+                Sign Up
+              </Link>
+            </div>
+          ) : null}
         </header>
       )}
 
@@ -196,11 +224,19 @@ export default function DashboardLayoutClient({
                   {profile?.full_name?.charAt(0) || "M"}
                 </div>
               </button>
-              {isMenuOpen && (
-                <div className="absolute right-0 mt-2 z-50">
-                  <UserMenuContent />
-                </div>
-              )}
+              <AnimatePresence>
+                {isMenuOpen && (
+                  <motion.div
+                    className="absolute right-0 mt-2 z-50"
+                    initial={{ opacity: 0, y: -4, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -4, scale: 0.97 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  >
+                    <UserMenuContent />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </header>
 
@@ -286,6 +322,36 @@ export default function DashboardLayoutClient({
                   <span className="font-semibold">Overview</span>
                 )}
               </Link>
+              <Link
+                href="/dashboard/find-records"
+                className={`group flex items-center p-3 rounded-xl transition-all duration-200 ${pathname === "/dashboard/find-records" ? "bg-teal-500/15 text-teal-700 dark:text-teal-400 shadow-sm shadow-teal-500/10" : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-500/10 hover:text-zinc-900 dark:hover:text-zinc-100"} ${isCollapsed ? "justify-center" : "gap-4 px-4"}`}
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                {!isCollapsed && (
+                  <span className="font-semibold">Find Records</span>
+                )}
+              </Link>
+              <Link
+                href="/dashboard/analytics"
+                className={`group flex items-center p-3 rounded-xl transition-all duration-200 ${pathname === "/dashboard/analytics" ? "bg-teal-500/15 text-teal-700 dark:text-teal-400 shadow-sm shadow-teal-500/10" : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-500/10 hover:text-zinc-900 dark:hover:text-zinc-100"} ${isCollapsed ? "justify-center" : "gap-4 px-4"}`}
+              >
+                <BarChart3 className="w-6 h-6" />
+                {!isCollapsed && (
+                  <span className="font-semibold">Analytics</span>
+                )}
+              </Link>
             </nav>
 
             {/* I'm placing the user profile trigger at the bottom of the sidebar. */}
@@ -293,13 +359,19 @@ export default function DashboardLayoutClient({
               className="p-4 mt-auto border-t border-zinc-200/60 dark:border-zinc-800/60 bg-zinc-50/30 dark:bg-zinc-900/30 backdrop-blur-md relative"
               ref={sidebarMenuRef}
             >
-              {isMenuOpen && (
-                <div
-                  className={`absolute bottom-full left-4 right-4 mb-2 z-50 ${isCollapsed ? "w-48 left-full ml-2 bottom-4" : ""}`}
-                >
-                  <UserMenuContent />
-                </div>
-              )}
+              <AnimatePresence>
+                {isMenuOpen && (
+                  <motion.div
+                    className={`absolute bottom-full left-4 right-4 mb-2 z-50 ${isCollapsed ? "w-48 left-full ml-2 bottom-4" : ""}`}
+                    initial={{ opacity: 0, y: 4, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 4, scale: 0.97 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  >
+                    <UserMenuContent />
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -326,6 +398,43 @@ export default function DashboardLayoutClient({
               </button>
             </div>
           </aside>
+
+          {/* Mobile bottom navigation bar */}
+          <nav className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden items-center justify-around bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-t border-zinc-200/60 dark:border-zinc-800/60 py-2 px-4">
+            <Link
+              href="/dashboard"
+              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all ${
+                pathname === "/dashboard"
+                  ? "text-teal-700 dark:text-teal-400"
+                  : "text-zinc-400 dark:text-zinc-500"
+              }`}
+            >
+              <LayoutDashboard className="w-5 h-5" />
+              <span className="text-[10px] font-bold">Overview</span>
+            </Link>
+            <Link
+              href="/dashboard/find-records"
+              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all ${
+                pathname === "/dashboard/find-records"
+                  ? "text-teal-700 dark:text-teal-400"
+                  : "text-zinc-400 dark:text-zinc-500"
+              }`}
+            >
+              <Search className="w-5 h-5" />
+              <span className="text-[10px] font-bold">Find Records</span>
+            </Link>
+            <Link
+              href="/dashboard/analytics"
+              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all ${
+                pathname === "/dashboard/analytics"
+                  ? "text-teal-700 dark:text-teal-400"
+                  : "text-zinc-400 dark:text-zinc-500"
+              }`}
+            >
+              <BarChart3 className="w-5 h-5" />
+              <span className="text-[10px] font-bold">Analytics</span>
+            </Link>
+          </nav>
         </>
       )}
 
@@ -334,7 +443,7 @@ export default function DashboardLayoutClient({
         className={`flex-1 min-h-0 overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out ${
           isHomePage
             ? "pt-16 w-full pb-12"
-            : `pt-6 px-6 pb-12 md:pt-10 md:px-10 md:pb-12 ${isCollapsed ? "md:ml-22" : "md:ml-72"}`
+            : `pt-6 px-6 pb-24 md:pt-10 md:px-10 md:pb-12 ${isCollapsed ? "md:ml-22" : "md:ml-72"}`
         }`}
       >
         {children}
