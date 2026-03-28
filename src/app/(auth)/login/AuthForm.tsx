@@ -168,6 +168,10 @@ export default function AuthForm() {
     };
   }, []);
 
+  useEffect(() => {
+    setIsLogin(searchParams.get("mode") !== "signup");
+  }, [searchParams]);
+
   // I'm using this helper to bold the part of the text that matches the user's search query.
   const highlightMatch = (text: string): ReactNode => {
     const index = text.toLowerCase().indexOf(rhuAssignment.toLowerCase());
@@ -323,10 +327,12 @@ export default function AuthForm() {
       setDirection(-1);
       setIsLogin(true);
       setError(null);
+      router.replace("/login", { scroll: false });
     } else if (type === "signup" && isLogin) {
       setDirection(1);
       setIsLogin(false);
       setError(null);
+      router.replace("/login?mode=signup", { scroll: false });
     }
   };
 
@@ -354,7 +360,7 @@ export default function AuthForm() {
               <motion.div
                 layoutId="active-pill"
                 className="absolute inset-0 bg-white/80 dark:bg-zinc-800/80 rounded-lg shadow-sm"
-                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                transition={{ type: "spring", stiffness: 420, damping: 34, mass: 0.9 }}
               />
             )}
             <span className="relative z-10">Log In</span>
@@ -371,7 +377,7 @@ export default function AuthForm() {
               <motion.div
                 layoutId="active-pill"
                 className="absolute inset-0 bg-white/80 dark:bg-zinc-800/80 rounded-lg shadow-sm"
-                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                transition={{ type: "spring", stiffness: 420, damping: 34, mass: 0.9 }}
               />
             )}
             <span className="relative z-10">Sign Up</span>
@@ -381,7 +387,7 @@ export default function AuthForm() {
 
       <motion.div
         layout
-        transition={{ type: "spring", stiffness: 500, damping: 35 }}
+        transition={{ type: "spring", stiffness: 360, damping: 32, mass: 0.95 }}
         className="relative overflow-hidden p-1 -m-1"
       >
         <AnimatePresence mode="wait" custom={direction}>
@@ -393,8 +399,9 @@ export default function AuthForm() {
             animate="center"
             exit="exit"
             transition={{
-              x: { type: "spring", stiffness: 500, damping: 35 },
-              opacity: { duration: 0.15 },
+              x: { type: "spring", stiffness: 360, damping: 32, mass: 0.95 },
+              opacity: { duration: 0.22, ease: "easeOut" },
+              layout: { type: "spring", stiffness: 360, damping: 32 },
             }}
             onSubmit={handleSubmit}
             className="flex flex-col gap-5"
@@ -411,7 +418,7 @@ export default function AuthForm() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                transition={{ type: "spring", stiffness: 360, damping: 32, mass: 0.95 }}
                 className="flex flex-col gap-5 overflow-visible"
               >
                 <div className="flex flex-col gap-2">

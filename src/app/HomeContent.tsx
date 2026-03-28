@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useLoading } from "@/src/context/LoadingContext";
 import LoadingScreen from "@/src/components/ui/LoadingScreen";
+import LoaderStopper from "@/src/components/ui/LoaderStopper";
 import DashboardLayoutClient from "@/src/app/dashboard/DashboardLayoutClient";
 import FabMenu from "@/src/components/ui/FabMenu";
 import ReportBugModal from "@/src/components/modals/ReportBugModal";
@@ -169,6 +170,8 @@ function HomeContentInner({ profile, isAuthenticated }: HomeContentProps) {
   return (
     <DashboardLayoutClient profile={profile} isAuthenticated={isAuthenticated}>
       <div className="relative text-slate-900 font-sans selection:bg-teal-100 selection:text-teal-900">
+        <LoaderStopper />
+
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           <div className="absolute top-[-10%] left-[-10%] w-[70%] h-[70%] bg-teal-100/40 rounded-full blur-[120px]" />
           <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-emerald-100/40 rounded-full blur-[120px] animate-glass-2" />

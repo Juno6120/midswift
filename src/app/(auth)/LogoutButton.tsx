@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/client";
+import { useLoading } from "@/src/context/LoadingContext";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LogoutModal } from "@/src/components/modals/LogoutModal";
@@ -10,6 +11,7 @@ import { LogoutModal } from "@/src/components/modals/LogoutModal";
 export function LogoutButton(): React.JSX.Element {
   // I’m grabbing the router instance here so I can redirect the user once they're signed out.
   const router = useRouter();
+  const { startLoading } = useLoading();
 
   // I'm initializing my Supabase client to interact with the authentication service.
   const supabase = createClient();
@@ -37,10 +39,11 @@ export function LogoutButton(): React.JSX.Element {
 
     // Now that the session is cleared, I'll close the modal.
     setIsOpen(false);
+    startLoading();
 
     // I’m using .replace() instead of .push() because I don't want the user to be able to
     // click the 'back' button and end up back on a protected page.
-    router.replace("/login");
+    router.replace("/");
 
     // I’m calling .refresh() to make sure the server components re-run and clear out any cached user data.
     router.refresh();

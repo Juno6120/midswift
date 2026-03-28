@@ -6,6 +6,7 @@ import Link from "next/link";
 import { LogoutModal } from "@/src/components/modals/LogoutModal";
 import { createClient } from "@/src/lib/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
+import { useLoading } from "@/src/context/LoadingContext";
 import { User, LogOut, RefreshCw, ChevronUp, ChevronDown, BarChart3, Search, LayoutDashboard } from "lucide-react";
 import LoadingScreen from "@/src/components/ui/LoadingScreen";
 import { motion, AnimatePresence } from "framer-motion";
@@ -43,6 +44,7 @@ export default function DashboardLayoutClient({
   const router = useRouter();
   const pathname = usePathname();
   const supabase = createClient();
+  const { startLoading } = useLoading();
 
   // I'm checking if I'm on the landing page so I can adjust the layout and header styles accordingly.
   const isHomePage = pathname === "/";
@@ -73,7 +75,8 @@ export default function DashboardLayoutClient({
       return;
     }
     setShowLogoutModal(false);
-    router.replace("/login");
+    startLoading();
+    router.replace("/");
     router.refresh();
   };
 
@@ -81,6 +84,17 @@ export default function DashboardLayoutClient({
   const handleSwitchAccount = () => {
     setIsNavigating(true);
     window.location.href = "/login?switch=true";
+  };
+
+  const handleNavigation = (href: string) => {
+    if (pathname === href) {
+      setIsMenuOpen(false);
+      return;
+    }
+
+    setIsMenuOpen(false);
+    startLoading();
+    router.push(href);
   };
 
   // I've moved the user menu items into a sub-component to keep the main JSX cleaner and easier to read.
@@ -137,7 +151,14 @@ export default function DashboardLayoutClient({
       {/* I only show this specific header layout if the user is on the Home Page. */}
       {isHomePage && (
         <header className="fixed top-0 left-0 right-0 h-16 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-xl border-b border-zinc-200/60 dark:border-zinc-800/60 z-50 px-6 flex items-center justify-between transition-colors duration-300">
-          <Link href="/" className="flex items-center gap-2">
+          <Link
+            href="/"
+            onClick={(event) => {
+              event.preventDefault();
+              handleNavigation("/");
+            }}
+            className="flex items-center gap-2"
+          >
             <Image
               src="/icons/midswift-logo.svg"
               alt="Logo"
@@ -203,7 +224,14 @@ export default function DashboardLayoutClient({
       {!isHomePage && (
         <>
           <header className="flex md:hidden shrink-0 items-center justify-between py-3 px-6 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-xl border-b border-zinc-200/60 dark:border-zinc-800/60 z-50 transition-colors duration-300">
-            <Link href="/" className="flex items-center gap-2 cursor-pointer">
+            <Link
+              href="/"
+              onClick={(event) => {
+                event.preventDefault();
+                handleNavigation("/");
+              }}
+              className="flex items-center gap-2 cursor-pointer"
+            >
               <Image
                 src="/icons/midswift-logo.svg"
                 alt="Logo"
@@ -266,7 +294,14 @@ export default function DashboardLayoutClient({
             <div
               className={`h-24 flex items-center ${isCollapsed ? "justify-center" : "px-8"}`}
             >
-              <Link href="/" className="flex items-center gap-3 cursor-pointer">
+              <Link
+                href="/"
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleNavigation("/");
+                }}
+                className="flex items-center gap-3 cursor-pointer"
+              >
                 <div className="relative w-10 h-10 shrink-0">
                   <Image
                     src="/icons/midswift-logo.svg"
@@ -291,39 +326,23 @@ export default function DashboardLayoutClient({
               )}
               <Link
                 href="/dashboard"
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleNavigation("/dashboard");
+                }}
                 className={`group flex items-center p-3 rounded-xl transition-all duration-200 ${pathname === "/dashboard" ? "bg-teal-500/15 text-teal-700 dark:text-teal-400 shadow-sm shadow-teal-500/10" : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-500/10 hover:text-zinc-900 dark:hover:text-zinc-100"} ${isCollapsed ? "justify-center" : "gap-4 px-4"}`}
               >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M3 12l4-4 4 4 4-5 4 3"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M3 20h18"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M7 20v-4M11 20v-4M15 20v-6M19 20v-8"
-                  />
-                </svg>
+                <LayoutDashboard className="w-6 h-6" />
                 {!isCollapsed && (
                   <span className="font-semibold">Overview</span>
                 )}
               </Link>
               <Link
                 href="/dashboard/find-records"
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleNavigation("/dashboard/find-records");
+                }}
                 className={`group flex items-center p-3 rounded-xl transition-all duration-200 ${pathname === "/dashboard/find-records" ? "bg-teal-500/15 text-teal-700 dark:text-teal-400 shadow-sm shadow-teal-500/10" : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-500/10 hover:text-zinc-900 dark:hover:text-zinc-100"} ${isCollapsed ? "justify-center" : "gap-4 px-4"}`}
               >
                 <svg
@@ -345,6 +364,10 @@ export default function DashboardLayoutClient({
               </Link>
               <Link
                 href="/dashboard/analytics"
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleNavigation("/dashboard/analytics");
+                }}
                 className={`group flex items-center p-3 rounded-xl transition-all duration-200 ${pathname === "/dashboard/analytics" ? "bg-teal-500/15 text-teal-700 dark:text-teal-400 shadow-sm shadow-teal-500/10" : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-500/10 hover:text-zinc-900 dark:hover:text-zinc-100"} ${isCollapsed ? "justify-center" : "gap-4 px-4"}`}
               >
                 <BarChart3 className="w-6 h-6" />
@@ -403,6 +426,10 @@ export default function DashboardLayoutClient({
           <nav className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden items-center justify-around bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-t border-zinc-200/60 dark:border-zinc-800/60 py-2 px-4">
             <Link
               href="/dashboard"
+              onClick={(event) => {
+                event.preventDefault();
+                handleNavigation("/dashboard");
+              }}
               className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all ${
                 pathname === "/dashboard"
                   ? "text-teal-700 dark:text-teal-400"
@@ -414,6 +441,10 @@ export default function DashboardLayoutClient({
             </Link>
             <Link
               href="/dashboard/find-records"
+              onClick={(event) => {
+                event.preventDefault();
+                handleNavigation("/dashboard/find-records");
+              }}
               className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all ${
                 pathname === "/dashboard/find-records"
                   ? "text-teal-700 dark:text-teal-400"
@@ -425,6 +456,10 @@ export default function DashboardLayoutClient({
             </Link>
             <Link
               href="/dashboard/analytics"
+              onClick={(event) => {
+                event.preventDefault();
+                handleNavigation("/dashboard/analytics");
+              }}
               className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all ${
                 pathname === "/dashboard/analytics"
                   ? "text-teal-700 dark:text-teal-400"

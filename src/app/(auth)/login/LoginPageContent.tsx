@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { X } from "lucide-react";
 import AuthForm from "./AuthForm";
 
 /**
@@ -10,17 +11,9 @@ import AuthForm from "./AuthForm";
  * explicit about what this component returns, keeping TypeScript perfectly happy.
  */
 export default function LoginPageContent(): React.ReactElement {
-  // I'm initializing the router and search params hooks so I can
-  // interact with the URL and handle navigation logic.
+  // I'm initializing the router hook so I can
+  // interact with navigation logic.
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  /**
-   * Here, I'm checking if there's a "switch" flag in the URL.
-   * If the URL has ?switch=true, I'll know the user is trying to
-   * switch accounts rather than just doing a fresh login.
-   */
-  const isSwitching: boolean = searchParams.get("switch") === "true";
 
   /**
    * I'm wrapping the back navigation in this handler.
@@ -38,8 +31,8 @@ export default function LoginPageContent(): React.ReactElement {
      * to make sure those decorative background blobs don't cause scrollbars.
      */
     <div className="relative min-h-screen flex items-center justify-center p-6 bg-[#FDFCFB] overflow-hidden">
-      {/* This is the "background layer." 
-          I'm using absolute positioning and high blur values to create 
+      {/* This is the "background layer."
+          I'm using absolute positioning and high blur values to create
           that soft, modern "glassmorphism" look with animated teal and indigo blobs.
       */}
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -50,24 +43,18 @@ export default function LoginPageContent(): React.ReactElement {
         <div className="absolute inset-0 bg-grain" />
       </div>
 
-      {/* This is the main card. 
-          I've added a backdrop blur and a slight white tint (bg-white/70) 
+      {/* This is the main card.
+          I've added a backdrop blur and a slight white tint (bg-white/70)
           so it feels like a frosted glass pane sitting on top of the blobs.
       */}
       <div className="relative z-10 w-full max-w-md bg-white/70 backdrop-blur-xl p-8 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-white/60">
-        {/* I'm only showing this "X" button if 'isSwitching' is true. 
-            It feels more intuitive to give users a way out if they 
-            accessed this page via a specific "switch account" action.
-        */}
-        {isSwitching && (
-          <button
-            onClick={handleCancel}
-            aria-label="Cancel"
-            className="absolute top-5 right-5 text-gray-500 hover:text-gray-800 transition-colors text-2xl font-semibold"
-          >
-            ×
-          </button>
-        )}
+        <button
+          onClick={handleCancel}
+          aria-label="Go back"
+          className="absolute top-5 right-5 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-gray-500 shadow-sm ring-1 ring-slate-200/70 transition-colors hover:text-gray-800"
+        >
+          <X className="h-5 w-5" />
+        </button>
 
         {/* Branding section: Just getting the logo and the titles centered nicely. */}
         <div className="flex flex-col items-center mb-8">
@@ -86,8 +73,8 @@ export default function LoginPageContent(): React.ReactElement {
           </p>
         </div>
 
-        {/* I'm dropping the AuthForm component here. 
-            This is where the actual input fields and submission logic live. 
+        {/* I'm dropping the AuthForm component here.
+            This is where the actual input fields and submission logic live.
         */}
         <AuthForm />
       </div>

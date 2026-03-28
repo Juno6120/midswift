@@ -43,7 +43,7 @@ export default function ReportSavedModal({
       // I explicitly typed this with `ReturnType<typeof setTimeout>` to avoid annoying NodeJS vs Window timeout conflicts in Next.js!
       const timer: ReturnType<typeof setTimeout> = setTimeout(() => {
         router.push("/dashboard");
-      }, 2500);
+      }, 3000);
 
       // It's always a good idea to clean up after ourselves. If the component unmounts
       // or the modal closes before the timer finishes, I clear the timeout and unlock the scroll.
@@ -108,7 +108,7 @@ export default function ReportSavedModal({
           </p>
 
           <p className="mt-6 text-[11px] font-bold text-zinc-400 uppercase tracking-[0.2em]">
-            Redirecting in seconds...
+            Redirecting in 3 seconds...
           </p>
         </div>
       </div>
