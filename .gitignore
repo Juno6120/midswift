@@ -21,6 +21,7 @@
 /build
 /android/.gradle
 /android/android-sdk
+/android/commandlinetools-win.zip
 /android/app/build
 /android/build
 /android/local.properties

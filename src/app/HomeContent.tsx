@@ -18,7 +18,14 @@ import {
   Shield,
   Clock,
   BarChart3,
+  Download,
+  X,
 } from "lucide-react";
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+}
 
 interface UserProfile {
   id: string;
@@ -63,6 +70,8 @@ function HomeContentInner({ profile, isAuthenticated }: HomeContentProps) {
   const [expandedFeature, setExpandedFeature] = useState<number | null>(null);
   const [isBugModalOpen, setIsBugModalOpen] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const [showAndroidDownloadPrompt, setShowAndroidDownloadPrompt] =
+    useState(false);
 
   const currentYear = new Date().getFullYear();
 
@@ -84,6 +93,23 @@ function HomeContentInner({ profile, isAuthenticated }: HomeContentProps) {
 
     return () => {
       setIsNavigating(false);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      const installEvent = event as BeforeInstallPromptEvent;
+      installEvent.preventDefault();
+      setShowAndroidDownloadPrompt(true);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
     };
   }, []);
 
@@ -145,6 +171,38 @@ function HomeContentInner({ profile, isAuthenticated }: HomeContentProps) {
         )}
 
         <main className="relative z-10 max-w-5xl mx-auto px-6 py-12 md:py-20">
+          {showAndroidDownloadPrompt && (
+            <div className="mb-8 flex items-start justify-between gap-4 rounded-[2rem] border border-teal-200 bg-white/70 px-6 py-5 shadow-lg shadow-teal-100/40 backdrop-blur-md">
+              <div className="space-y-2">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-600">
+                  Android App
+                </p>
+                <p className="text-sm font-medium leading-relaxed text-slate-600">
+                  Install MidSwift as the full Android app instead of adding a
+                  browser shortcut.
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-3">
+                <a
+                  href="/downloads/midswift-android.apk"
+                  download
+                  className="inline-flex items-center gap-2 rounded-2xl bg-teal-600 px-5 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-teal-700"
+                >
+                  <Download className="h-4 w-4" />
+                  Download App
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setShowAndroidDownloadPrompt(false)}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white/80 text-slate-500 transition-colors hover:text-slate-700"
+                  aria-label="Dismiss app download prompt"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="grid lg:grid-cols-5 gap-12 items-center min-h-[70vh]">
             <div className="lg:col-span-3 space-y-10">
               <div
@@ -181,14 +239,25 @@ function HomeContentInner({ profile, isAuthenticated }: HomeContentProps) {
                 </p>
               </div>
 
-              <Link
-                href={isAuthenticated ? "/dashboard" : "/login"}
-                onClick={isAuthenticated ? handleNavigation : undefined}
-                className="inline-flex items-center gap-4 bg-teal-600 text-white px-10 py-6 rounded-[2rem] text-xl font-bold shadow-[0_10px_20px_-5px_rgba(13,148,136,0.3)] hover:bg-teal-700 hover:shadow-2xl hover:-translate-y-1 transition-all active:scale-95 group"
-              >
-                {isAuthenticated ? "Go to my Dashboard" : "Get Started"}
-                <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
-              </Link>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <Link
+                  href={isAuthenticated ? "/dashboard" : "/login"}
+                  onClick={isAuthenticated ? handleNavigation : undefined}
+                  className="inline-flex items-center justify-center gap-4 rounded-[2rem] bg-teal-600 px-10 py-6 text-xl font-bold text-white shadow-[0_10px_20px_-5px_rgba(13,148,136,0.3)] transition-all active:scale-95 group hover:-translate-y-1 hover:bg-teal-700 hover:shadow-2xl"
+                >
+                  {isAuthenticated ? "Go to my Dashboard" : "Get Started"}
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                </Link>
+
+                <a
+                  href="/downloads/midswift-android.apk"
+                  download
+                  className="inline-flex items-center justify-center gap-3 rounded-[2rem] border border-teal-200 bg-white/80 px-8 py-6 text-lg font-bold text-teal-700 shadow-[0_10px_20px_-10px_rgba(15,23,42,0.18)] transition-all hover:-translate-y-1 hover:border-teal-300 hover:bg-white"
+                >
+                  <Download className="h-5 w-5" />
+                  Download App
+                </a>
+              </div>
 
               <div className="flex items-center gap-6 pt-4">
                 <div className="flex items-center gap-2 text-sm font-bold text-slate-400">
